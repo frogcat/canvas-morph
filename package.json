@@ -1,0 +1,30 @@
+{
+  "name": "canvas-morph",
+  "version": "1.0.0",
+  "description": "canvas-morph",
+  "main": "main.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frogcat/canvas-morph.git"
+  },
+  "keywords": [
+    "canvas"
+  ],
+  "author": "frogcat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/frogcat/canvas-morph/issues"
+  },
+  "homepage": "https://github.com/frogcat/canvas-morph#readme",
+  "dependencies": {
+    "delaunator": "^4.0.1"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  }
+}

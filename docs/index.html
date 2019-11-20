@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>canvas-morph</title>
+  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+  <script src="canvas-morph.js"></script>
+  <style>
+    div.cell {
+      display: inline-block;
+      width: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cell">
+    <h1>Source Image</h1>
+    <img src="https://cyberjapandata.gsi.go.jp/xyz/std/2/3/1.png" crossorigin="anonymous" onload="init(this)" />
+  </div>
+  <div class="cell">
+    <h1>Canvas2D</h1>
+    <canvas width="256" height="256" id="canvas"></canvas>
+  </div>
+  <div class="cell">
+    <h1>Morph</h1>
+    <canvas width="256" height="256" id="morph"></canvas>
+  </div>
+
+  <script>
+    function init(img) {
+      initCanvas(img);
+      initMorph(img);
+    }
+
+    function initCanvas(img) {
+      var context = document.getElementById("canvas").getContext("2d");
+      context.drawImage(img, 0, 0, 256, 256);
+    }
+
+    function initMorph(img) {
+      var context = document.getElementById("morph").getContext("morph");
+      setInterval(function() {
+        var radian = new Date().getTime() / 300;
+        context.drawImage(img, [
+          [0, 0, 0, 0],
+          [255, 0, 255, 0],
+          [255, 255, 255, 255],
+          [0, 255, 0, 255],
+          [127, 127, 127 + 40 * Math.cos(radian), 127 + 40 * Math.sin(radian)]
+        ]);
+      }, 100);
+    }
+  </script>
+</body>
+
+</html>
