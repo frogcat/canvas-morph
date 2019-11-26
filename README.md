@@ -7,7 +7,7 @@ canvas-morph
 
 # Usage
 
-```
+```html
 <!-- import canva-morph.js to extend HTMLCanvasElement -->
 <script src='https://frogcat.github.io/canvas-morph/canvas-morph.js' />
 
