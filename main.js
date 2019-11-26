@@ -91,22 +91,33 @@ import Delaunator from 'delaunator';
       throw new Error(gl.getProgramInfoLog(pg));
     }
 
+    var _previousImage = null;
+
     return {
       _coords: null,
       canvas: canvas,
       drawImage: function(image, controlPoints) {
-        (function(texture) {
-          gl.bindTexture(gl.TEXTURE_2D, texture);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        })(gl.createTexture());
+        if (_previousImage !== image) {
 
-        (function(location) {
-          gl.uniform4f(location, 1 / image.naturalWidth, 1 / image.naturalHeight, 2 / canvas.width, -2 / canvas.height);
-        })(gl.getUniformLocation(pg, "m"));
+          var copy = document.createElement("canvas");
+          copy.width = Math.pow(2, Math.ceil(Math.log2(image.naturalWidth)));
+          copy.height = Math.pow(2, Math.ceil(Math.log2(image.naturalHeight)));
+          copy.getContext("2d").drawImage(image, 0, 0);
+
+          (function(texture) {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, copy);
+          })(gl.createTexture());
+
+          (function(location) {
+            gl.uniform4f(location, 1 / copy.width, 1 / copy.height, 2 / canvas.width, -2 / canvas.height);
+          })(gl.getUniformLocation(pg, "m"));
+          _previousImage = image;
+        }
 
         var coords = [];
         Delaunator.from(controlPoints).triangles.forEach(function(i) {
