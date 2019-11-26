@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>canvas-morph leaflet demo</title>
+  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+  <script src="canvas-morph.js"></script>
+</head>
+
+<body>
+  <div id="map" style="position:absolute;top:0;left:0;right:0;bottom:0;"></div>
+  <script>
+    new Promise(resolve => {
+      var image = new Image();
+      image.crossOrigin = "anonymous";
+      image.onload = function() {
+        resolve(image);
+      };
+      image.src = "nico.jpg";
+    }).then(image => {
+
+      var map = L.map("map", {
+        maxZoom: 20,
+        center: [35.61681, 139.62654],
+        zoom: 17
+      });
+
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
+        attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
+        maxNativeZoom: 18,
+        maxZoom: 20
+      }).addTo(map);
+
+      var markers = (function() {
+
+        var initialControlPoints = [
+          [0, 0, 139.62080240249637, 35.61737813615187],
+          [2072, 0, 139.62963759899142, 35.61980710109022],
+          [0, 1460, 139.6227335929871, 35.6123324561604],
+          [2072, 1460, 139.63160097599032, 35.61475285231615]
+        ];
+
+        return initialControlPoints.map(a => {
+          var marker = L.marker([a[3], a[2]], {
+            draggable: true
+          }).on("drag", function() {
+            map.fire("moveend");
+          }).addTo(map);
+          marker.texturePoint = L.point(a[0], a[1]);
+          return marker;
+        });
+      })();
+
+      var canvas = document.createElement("canvas");
+      canvas.style.opacity = 0.8;
+      map.getPane("overlayPane").appendChild(canvas);
+
+      var context = canvas.getContext("morph");
+
+      map.on("resize", function() {
+        var s = map.getSize();
+        canvas.width = s.x;
+        canvas.height = s.y;
+        canvas.style.width = s.x + "px";
+        canvas.style.height = s.y + "px";
+      }).on("resize zoom viewreset moveend", function() {
+
+        L.DomUtil.setPosition(canvas, map.containerPointToLayerPoint([0, 0]));
+        context.clear();
+        context.drawImage(image, markers.map(marker => {
+          var p = map.latLngToContainerPoint(marker.getLatLng());
+          return [
+            marker.texturePoint.x,
+            marker.texturePoint.y,
+            p.x,
+            p.y
+          ];
+        }));
+      }).fire("resize");
+
+    });
+  </script>
+</body>
+
+</html>
