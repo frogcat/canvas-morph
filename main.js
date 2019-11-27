@@ -92,6 +92,7 @@ import Delaunator from 'delaunator';
     }
 
     var _previousImage = null;
+    var _previousCopy = null;
 
     return {
       _coords: null,
@@ -99,10 +100,10 @@ import Delaunator from 'delaunator';
       drawImage: function(image, controlPoints) {
         if (_previousImage !== image) {
 
-          var copy = document.createElement("canvas");
-          copy.width = Math.pow(2, Math.ceil(Math.log2(image.naturalWidth)));
-          copy.height = Math.pow(2, Math.ceil(Math.log2(image.naturalHeight)));
-          copy.getContext("2d").drawImage(image, 0, 0);
+          _previousCopy = document.createElement("canvas");
+          _previousCopy.width = Math.pow(2, Math.ceil(Math.log2(image.naturalWidth)));
+          _previousCopy.height = Math.pow(2, Math.ceil(Math.log2(image.naturalHeight)));
+          _previousCopy.getContext("2d").drawImage(image, 0, 0);
 
           (function(texture) {
             gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -110,12 +111,9 @@ import Delaunator from 'delaunator';
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, copy);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, _previousCopy);
           })(gl.createTexture());
 
-          (function(location) {
-            gl.uniform4f(location, 1 / copy.width, 1 / copy.height, 2 / canvas.width, -2 / canvas.height);
-          })(gl.getUniformLocation(pg, "m"));
           _previousImage = image;
         }
 
@@ -125,6 +123,10 @@ import Delaunator from 'delaunator';
         });
 
         this._coords = coords;
+
+        (function(location) {
+          gl.uniform4f(location, 1 / _previousCopy.width, 1 / _previousCopy.height, 2 / canvas.width, -2 / canvas.height);
+        })(gl.getUniformLocation(pg, "m"));
 
         var buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
