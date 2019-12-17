@@ -1,1 +1,676 @@
-!function(t){var e={};function r(i){if(e[i])return e[i].exports;var n=e[i]={i:i,l:!1,exports:{}};return t[i].call(n.exports,n,n.exports,r),n.l=!0,n.exports}r.m=t,r.c=e,r.d=function(t,e,i){r.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:i})},r.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},r.t=function(t,e){if(1&e&&(t=r(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var i=Object.create(null);if(r.r(i),Object.defineProperty(i,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var n in t)r.d(i,n,function(e){return t[e]}.bind(null,n));return i},r.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return r.d(e,"a",e),e},r.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},r.p="",r(r.s=0)}([function(t,e,r){"use strict";r.r(e);const i=Math.pow(2,-52),n=new Uint32Array(512);class a{static from(t,e=_,r=d){const i=t.length,n=new Float64Array(2*i);for(let a=0;a<i;a++){const i=t[a];n[2*a]=e(i),n[2*a+1]=r(i)}return new a(n)}constructor(t){const e=t.length>>1;if(e>0&&"number"!=typeof t[0])throw new Error("Expected coords to contain numbers.");this.coords=t;const r=Math.max(2*e-5,0);this._triangles=new Uint32Array(3*r),this._halfedges=new Int32Array(3*r),this._hashSize=Math.ceil(Math.sqrt(e)),this._hullPrev=new Uint32Array(e),this._hullNext=new Uint32Array(e),this._hullTri=new Uint32Array(e),this._hullHash=new Int32Array(this._hashSize).fill(-1),this._ids=new Uint32Array(e),this._dists=new Float64Array(e),this.update()}update(){const{coords:t,_hullPrev:e,_hullNext:r,_hullTri:n,_hullHash:a}=this,o=t.length>>1;let l=1/0,f=1/0,_=-1/0,d=-1/0;for(let e=0;e<o;e++){const r=t[2*e],i=t[2*e+1];r<l&&(l=r),i<f&&(f=i),r>_&&(_=r),i>d&&(d=i),this._ids[e]=e}const g=(l+_)/2,v=(f+d)/2;let y,T,p,E=1/0;for(let e=0;e<o;e++){const r=s(g,v,t[2*e],t[2*e+1]);r<E&&(y=e,E=r)}const A=t[2*y],m=t[2*y+1];E=1/0;for(let e=0;e<o;e++){if(e===y)continue;const r=s(A,m,t[2*e],t[2*e+1]);r<E&&r>0&&(T=e,E=r)}let w=t[2*T],b=t[2*T+1],S=1/0;for(let e=0;e<o;e++){if(e===y||e===T)continue;const r=u(A,m,w,b,t[2*e],t[2*e+1]);r<S&&(p=e,S=r)}let R=t[2*p],x=t[2*p+1];if(S===1/0){for(let e=0;e<o;e++)this._dists[e]=t[2*e]-t[0]||t[2*e+1]-t[1];c(this._ids,this._dists,0,o-1);const e=new Uint32Array(o);let r=0;for(let t=0,i=-1/0;t<o;t++){const n=this._ids[t];this._dists[n]>i&&(e[r++]=n,i=this._dists[n])}return this.hull=e.subarray(0,r),this.triangles=new Uint32Array(0),void(this.halfedges=new Uint32Array(0))}if(h(A,m,w,b,R,x)){const t=T,e=w,r=b;T=p,w=R,b=x,p=t,R=e,x=r}const M=function(t,e,r,i,n,a){const s=r-t,o=i-e,h=n-t,l=a-e,u=s*s+o*o,c=h*h+l*l,f=.5/(s*l-o*h);return{x:t+(l*u-o*c)*f,y:e+(s*c-h*u)*f}}(A,m,w,b,R,x);this._cx=M.x,this._cy=M.y;for(let e=0;e<o;e++)this._dists[e]=s(t[2*e],t[2*e+1],M.x,M.y);c(this._ids,this._dists,0,o-1),this._hullStart=y;let U=3;r[y]=e[p]=T,r[T]=e[y]=p,r[p]=e[T]=y,n[y]=0,n[T]=1,n[p]=2,a.fill(-1),a[this._hashKey(A,m)]=y,a[this._hashKey(w,b)]=T,a[this._hashKey(R,x)]=p,this.trianglesLen=0,this._addTriangle(y,T,p,-1,-1,-1);for(let s,o,l=0;l<this._ids.length;l++){const u=this._ids[l],c=t[2*u],f=t[2*u+1];if(l>0&&Math.abs(c-s)<=i&&Math.abs(f-o)<=i)continue;if(s=c,o=f,u===y||u===T||u===p)continue;let _=0;for(let t=0,e=this._hashKey(c,f);t<this._hashSize&&(-1===(_=a[(e+t)%this._hashSize])||_===r[_]);t++);let d,g=_=e[_];for(;d=r[g],!h(c,f,t[2*g],t[2*g+1],t[2*d],t[2*d+1]);)if((g=d)===_){g=-1;break}if(-1===g)continue;let v=this._addTriangle(g,u,r[g],-1,-1,n[g]);n[u]=this._legalize(v+2),n[g]=v,U++;let E=r[g];for(;d=r[E],h(c,f,t[2*E],t[2*E+1],t[2*d],t[2*d+1]);)v=this._addTriangle(E,u,d,n[u],-1,n[E]),n[u]=this._legalize(v+2),r[E]=E,U--,E=d;if(g===_)for(;h(c,f,t[2*(d=e[g])],t[2*d+1],t[2*g],t[2*g+1]);)v=this._addTriangle(d,u,g,-1,n[g],n[d]),this._legalize(v+2),n[d]=v,r[g]=g,U--,g=d;this._hullStart=e[u]=g,r[g]=e[E]=u,r[u]=E,a[this._hashKey(c,f)]=u,a[this._hashKey(t[2*g],t[2*g+1])]=g}this.hull=new Uint32Array(U);for(let t=0,e=this._hullStart;t<U;t++)this.hull[t]=e,e=r[e];this.triangles=this._triangles.subarray(0,this.trianglesLen),this.halfedges=this._halfedges.subarray(0,this.trianglesLen)}_hashKey(t,e){return Math.floor(function(t,e){const r=t/(Math.abs(t)+Math.abs(e));return(e>0?3-r:1+r)/4}(t-this._cx,e-this._cy)*this._hashSize)%this._hashSize}_legalize(t){const{_triangles:e,_halfedges:r,coords:i}=this;let a=0,s=0;for(;;){const o=r[t],h=t-t%3;if(s=h+(t+2)%3,-1===o){if(0===a)break;t=n[--a];continue}const u=o-o%3,c=h+(t+1)%3,f=u+(o+2)%3,_=e[s],d=e[t],g=e[c],v=e[f];if(l(i[2*_],i[2*_+1],i[2*d],i[2*d+1],i[2*g],i[2*g+1],i[2*v],i[2*v+1])){e[t]=v,e[o]=_;const i=r[f];if(-1===i){let e=this._hullStart;do{if(this._hullTri[e]===f){this._hullTri[e]=t;break}e=this._hullPrev[e]}while(e!==this._hullStart)}this._link(t,i),this._link(o,r[s]),this._link(s,f);const h=u+(o+1)%3;a<n.length&&(n[a++]=h)}else{if(0===a)break;t=n[--a]}}return s}_link(t,e){this._halfedges[t]=e,-1!==e&&(this._halfedges[e]=t)}_addTriangle(t,e,r,i,n,a){const s=this.trianglesLen;return this._triangles[s]=t,this._triangles[s+1]=e,this._triangles[s+2]=r,this._link(s,i),this._link(s+1,n),this._link(s+2,a),this.trianglesLen+=3,s}}function s(t,e,r,i){const n=t-r,a=e-i;return n*n+a*a}function o(t,e,r,i,n,a){const s=(i-e)*(n-t),o=(r-t)*(a-e);return Math.abs(s-o)>=33306690738754716e-32*Math.abs(s+o)?s-o:0}function h(t,e,r,i,n,a){return(o(n,a,t,e,r,i)||o(t,e,r,i,n,a)||o(r,i,n,a,t,e))<0}function l(t,e,r,i,n,a,s,o){const h=t-s,l=e-o,u=r-s,c=i-o,f=n-s,_=a-o,d=u*u+c*c,g=f*f+_*_;return h*(c*g-d*_)-l*(u*g-d*f)+(h*h+l*l)*(u*_-c*f)<0}function u(t,e,r,i,n,a){const s=r-t,o=i-e,h=n-t,l=a-e,u=s*s+o*o,c=h*h+l*l,f=.5/(s*l-o*h),_=(l*u-o*c)*f,d=(s*c-h*u)*f;return _*_+d*d}function c(t,e,r,i){if(i-r<=20)for(let n=r+1;n<=i;n++){const i=t[n],a=e[i];let s=n-1;for(;s>=r&&e[t[s]]>a;)t[s+1]=t[s--];t[s+1]=i}else{let n=r+1,a=i;f(t,r+i>>1,n),e[t[r]]>e[t[i]]&&f(t,r,i),e[t[n]]>e[t[i]]&&f(t,n,i),e[t[r]]>e[t[n]]&&f(t,r,n);const s=t[n],o=e[s];for(;;){do{n++}while(e[t[n]]<o);do{a--}while(e[t[a]]>o);if(a<n)break;f(t,n,a)}t[r+1]=t[a],t[a]=s,i-n+1>=a-r?(c(t,e,n,i),c(t,e,r,a-1)):(c(t,e,r,a-1),c(t,e,n,i))}}function f(t,e,r){const i=t[e];t[e]=t[r],t[r]=i}function _(t){return t[0]}function d(t){return t[1]}!function(t){function e(t,e){for(var r=[],i=0;i<e.length;i+=3)for(var n=0;n<3;n++)r.push(t[n+0]*e[i+0]+t[n+3]*e[i+1]+t[n+6]*e[i+2]);return r}function r(t,e){return[t[0]-e[0],t[1]-e[1]]}function i(t,e){return t[0]*e[1]-t[1]*e[0]}var n=t.prototype.getContext;t.prototype.getContext=function(t,s){var o=this;if("morph"!==t)return n.apply(o,[t,s]);var h,l=o.getContext("webgl",{preserveDrawingBuffer:!0}),u=this.pg=l.createProgram();if(h=l.createShader(l.VERTEX_SHADER),l.shaderSource(h,"attribute vec4 p;varying vec2 a;uniform vec4 m;void main(){vec4 q=m*p;gl_Position=vec4(q.zw,0,1)+vec4(-1,1,0,0);a=q.xy;}"),l.compileShader(h),l.attachShader(u,h),function(t){l.shaderSource(t,"precision mediump float;uniform sampler2D i;varying vec2 a;void main(){gl_FragColor=texture2D(i,a);}"),l.compileShader(t),l.attachShader(u,t)}(l.createShader(l.FRAGMENT_SHADER)),l.linkProgram(u),!l.getProgramParameter(u,l.LINK_STATUS))throw new Error(l.getProgramInfoLog(u));l.useProgram(u);var c=null,f=null;return{_coords:null,canvas:o,drawImage:function(t,e){var r;c!==t&&((f=document.createElement("canvas")).width=Math.pow(2,Math.ceil(Math.log2(t.naturalWidth))),f.height=Math.pow(2,Math.ceil(Math.log2(t.naturalHeight))),f.getContext("2d").drawImage(t,0,0),r=l.createTexture(),l.bindTexture(l.TEXTURE_2D,r),l.texParameteri(l.TEXTURE_2D,l.TEXTURE_WRAP_S,l.CLAMP_TO_EDGE),l.texParameteri(l.TEXTURE_2D,l.TEXTURE_WRAP_T,l.CLAMP_TO_EDGE),l.texParameteri(l.TEXTURE_2D,l.TEXTURE_MIN_FILTER,l.NEAREST),l.texParameteri(l.TEXTURE_2D,l.TEXTURE_MAG_FILTER,l.NEAREST),l.texImage2D(l.TEXTURE_2D,0,l.RGBA,l.RGBA,l.UNSIGNED_BYTE,f),c=t);var i=[];a.from(e).triangles.forEach((function(t){Array.prototype.push.apply(i,e[t])})),this._coords=i,function(t){l.uniform4f(t,1/f.width,1/f.height,2/o.width,-2/o.height)}(l.getUniformLocation(u,"m"));var n=l.createBuffer();l.bindBuffer(l.ARRAY_BUFFER,n),l.bufferData(l.ARRAY_BUFFER,new Float32Array(i),l.STATIC_DRAW);var s=l.getAttribLocation(u,"p");l.enableVertexAttribArray(s),l.vertexAttribPointer(s,4,l.FLOAT,!1,0,0),l.drawArrays(l.TRIANGLES,0,i.length/4)},clear:function(){l.viewport(0,0,l.drawingBufferWidth,l.drawingBufferHeight),l.clearColor(0,0,0,0),l.clear(l.COLOR_BUFFER_BIT)},getTexturePointAt:function(t,n){for(var a,s,o,h,l,u,c,f,_,d,g,v,y,T,p,E,A=this._coords,m=0;m<A.length;m+=12){var w=[[A[m+2],A[m+3]],[A[m+6],A[m+7]],[A[m+10],A[m+11]]],b=[[A[m+0],A[m+1]],[A[m+4],A[m+5]],[A[m+8],A[m+9]]];if(u=[t,n],f=void 0,_=void 0,d=void 0,g=void 0,v=void 0,y=void 0,T=void 0,p=void 0,E=void 0,f=r((c=w)[1],c[0]),_=r(c[2],c[1]),d=r(c[0],c[2]),g=r(u,c[0]),v=r(u,c[1]),y=r(u,c[2]),T=i(f,v),p=i(_,y),E=i(d,g),T>0&&p>0&&E>0||T<0&&p<0&&E<0){var S=(s=b,o=void 0,h=void 0,l=void 0,l=[(a=w)[0][0],a[0][1],1,a[1][0],a[1][1],1,a[2][0],a[2][1],1],e([s[0][0],s[0][1],1,s[1][0],s[1][1],1,s[2][0],s[2][1],1],(h=(o=l)[0]*o[4]*o[8]+o[3]*o[7]*o[2]+o[6]*o[1]*o[5]-o[0]*o[7]*o[5]-o[6]*o[4]*o[2]-o[3]*o[1]*o[8],[(o[4]*o[8]-o[7]*o[5])/h,(o[7]*o[2]-o[1]*o[8])/h,(o[1]*o[5]-o[4]*o[2])/h,(o[6]*o[5]-o[3]*o[8])/h,(o[0]*o[8]-o[6]*o[2])/h,(o[3]*o[2]-o[0]*o[5])/h,(o[3]*o[7]-o[6]*o[4])/h,(o[6]*o[1]-o[0]*o[7])/h,(o[0]*o[4]-o[1]*o[3])/h]))),R=e(S,[t,n,1]);return[R[0],R[1]]}}return null}}}}(HTMLCanvasElement)}]);
+(function () {
+    'use strict';
+
+    var EPSILON = Math.pow(2, -52);
+    var EDGE_STACK = new Uint32Array(512);
+
+    var Delaunator = function Delaunator(coords) {
+        var n = coords.length >> 1;
+        if (n > 0 && typeof coords[0] !== 'number') { throw new Error('Expected coords to contain numbers.'); }
+
+        this.coords = coords;
+
+        // arrays that will store the triangulation graph
+        var maxTriangles = Math.max(2 * n - 5, 0);
+        this._triangles = new Uint32Array(maxTriangles * 3);
+        this._halfedges = new Int32Array(maxTriangles * 3);
+
+        // temporary arrays for tracking the edges of the advancing convex hull
+        this._hashSize = Math.ceil(Math.sqrt(n));
+        this._hullPrev = new Uint32Array(n); // edge to prev edge
+        this._hullNext = new Uint32Array(n); // edge to next edge
+        this._hullTri = new Uint32Array(n); // edge to adjacent triangle
+        this._hullHash = new Int32Array(this._hashSize).fill(-1); // angular edge hash
+
+        // temporary arrays for sorting points
+        this._ids = new Uint32Array(n);
+        this._dists = new Float64Array(n);
+
+        this.update();
+    };
+
+    Delaunator.from = function from (points, getX, getY) {
+            if ( getX === void 0 ) getX = defaultGetX;
+            if ( getY === void 0 ) getY = defaultGetY;
+
+        var n = points.length;
+        var coords = new Float64Array(n * 2);
+
+        for (var i = 0; i < n; i++) {
+            var p = points[i];
+            coords[2 * i] = getX(p);
+            coords[2 * i + 1] = getY(p);
+        }
+
+        return new Delaunator(coords);
+    };
+
+    Delaunator.prototype.update = function update () {
+        var ref =  this;
+            var coords = ref.coords;
+            var hullPrev = ref._hullPrev;
+            var hullNext = ref._hullNext;
+            var hullTri = ref._hullTri;
+            var hullHash = ref._hullHash;
+        var n = coords.length >> 1;
+
+        // populate an array of point indices; calculate input data bbox
+        var minX = Infinity;
+        var minY = Infinity;
+        var maxX = -Infinity;
+        var maxY = -Infinity;
+
+        for (var i = 0; i < n; i++) {
+            var x = coords[2 * i];
+            var y = coords[2 * i + 1];
+            if (x < minX) { minX = x; }
+            if (y < minY) { minY = y; }
+            if (x > maxX) { maxX = x; }
+            if (y > maxY) { maxY = y; }
+            this._ids[i] = i;
+        }
+        var cx = (minX + maxX) / 2;
+        var cy = (minY + maxY) / 2;
+
+        var minDist = Infinity;
+        var i0, i1, i2;
+
+        // pick a seed point close to the center
+        for (var i$1 = 0; i$1 < n; i$1++) {
+            var d = dist(cx, cy, coords[2 * i$1], coords[2 * i$1 + 1]);
+            if (d < minDist) {
+                i0 = i$1;
+                minDist = d;
+            }
+        }
+        var i0x = coords[2 * i0];
+        var i0y = coords[2 * i0 + 1];
+
+        minDist = Infinity;
+
+        // find the point closest to the seed
+        for (var i$2 = 0; i$2 < n; i$2++) {
+            if (i$2 === i0) { continue; }
+            var d$1 = dist(i0x, i0y, coords[2 * i$2], coords[2 * i$2 + 1]);
+            if (d$1 < minDist && d$1 > 0) {
+                i1 = i$2;
+                minDist = d$1;
+            }
+        }
+        var i1x = coords[2 * i1];
+        var i1y = coords[2 * i1 + 1];
+
+        var minRadius = Infinity;
+
+        // find the third point which forms the smallest circumcircle with the first two
+        for (var i$3 = 0; i$3 < n; i$3++) {
+            if (i$3 === i0 || i$3 === i1) { continue; }
+            var r = circumradius(i0x, i0y, i1x, i1y, coords[2 * i$3], coords[2 * i$3 + 1]);
+            if (r < minRadius) {
+                i2 = i$3;
+                minRadius = r;
+            }
+        }
+        var i2x = coords[2 * i2];
+        var i2y = coords[2 * i2 + 1];
+
+        if (minRadius === Infinity) {
+            // order collinear points by dx (or dy if all x are identical)
+            // and return the list as a hull
+            for (var i$4 = 0; i$4 < n; i$4++) {
+                this._dists[i$4] = (coords[2 * i$4] - coords[0]) || (coords[2 * i$4 + 1] - coords[1]);
+            }
+            quicksort(this._ids, this._dists, 0, n - 1);
+            var hull = new Uint32Array(n);
+            var j = 0;
+            for (var i$5 = 0, d0 = -Infinity; i$5 < n; i$5++) {
+                var id = this._ids[i$5];
+                if (this._dists[id] > d0) {
+                    hull[j++] = id;
+                    d0 = this._dists[id];
+                }
+            }
+            this.hull = hull.subarray(0, j);
+            this.triangles = new Uint32Array(0);
+            this.halfedges = new Uint32Array(0);
+            return;
+        }
+
+        // swap the order of the seed points for counter-clockwise orientation
+        if (orient(i0x, i0y, i1x, i1y, i2x, i2y)) {
+            var i$6 = i1;
+            var x$1 = i1x;
+            var y$1 = i1y;
+            i1 = i2;
+            i1x = i2x;
+            i1y = i2y;
+            i2 = i$6;
+            i2x = x$1;
+            i2y = y$1;
+        }
+
+        var center = circumcenter(i0x, i0y, i1x, i1y, i2x, i2y);
+        this._cx = center.x;
+        this._cy = center.y;
+
+        for (var i$7 = 0; i$7 < n; i$7++) {
+            this._dists[i$7] = dist(coords[2 * i$7], coords[2 * i$7 + 1], center.x, center.y);
+        }
+
+        // sort the points by distance from the seed triangle circumcenter
+        quicksort(this._ids, this._dists, 0, n - 1);
+
+        // set up the seed triangle as the starting hull
+        this._hullStart = i0;
+        var hullSize = 3;
+
+        hullNext[i0] = hullPrev[i2] = i1;
+        hullNext[i1] = hullPrev[i0] = i2;
+        hullNext[i2] = hullPrev[i1] = i0;
+
+        hullTri[i0] = 0;
+        hullTri[i1] = 1;
+        hullTri[i2] = 2;
+
+        hullHash.fill(-1);
+        hullHash[this._hashKey(i0x, i0y)] = i0;
+        hullHash[this._hashKey(i1x, i1y)] = i1;
+        hullHash[this._hashKey(i2x, i2y)] = i2;
+
+        this.trianglesLen = 0;
+        this._addTriangle(i0, i1, i2, -1, -1, -1);
+
+        for (var k = 0, xp = (void 0), yp = (void 0); k < this._ids.length; k++) {
+            var i$8 = this._ids[k];
+            var x$2 = coords[2 * i$8];
+            var y$2 = coords[2 * i$8 + 1];
+
+            // skip near-duplicate points
+            if (k > 0 && Math.abs(x$2 - xp) <= EPSILON && Math.abs(y$2 - yp) <= EPSILON) { continue; }
+            xp = x$2;
+            yp = y$2;
+
+            // skip seed triangle points
+            if (i$8 === i0 || i$8 === i1 || i$8 === i2) { continue; }
+
+            // find a visible edge on the convex hull using edge hash
+            var start = 0;
+            for (var j$1 = 0, key = this._hashKey(x$2, y$2); j$1 < this._hashSize; j$1++) {
+                start = hullHash[(key + j$1) % this._hashSize];
+                if (start !== -1 && start !== hullNext[start]) { break; }
+            }
+
+            start = hullPrev[start];
+            var e = start, q = (void 0);
+            while (q = hullNext[e], !orient(x$2, y$2, coords[2 * e], coords[2 * e + 1], coords[2 * q], coords[2 * q + 1])) {
+                e = q;
+                if (e === start) {
+                    e = -1;
+                    break;
+                }
+            }
+            if (e === -1) { continue; } // likely a near-duplicate point; skip it
+
+            // add the first triangle from the point
+            var t = this._addTriangle(e, i$8, hullNext[e], -1, -1, hullTri[e]);
+
+            // recursively flip triangles from the point until they satisfy the Delaunay condition
+            hullTri[i$8] = this._legalize(t + 2);
+            hullTri[e] = t; // keep track of boundary triangles on the hull
+            hullSize++;
+
+            // walk forward through the hull, adding more triangles and flipping recursively
+            var n$1 = hullNext[e];
+            while (q = hullNext[n$1], orient(x$2, y$2, coords[2 * n$1], coords[2 * n$1 + 1], coords[2 * q], coords[2 * q + 1])) {
+                t = this._addTriangle(n$1, i$8, q, hullTri[i$8], -1, hullTri[n$1]);
+                hullTri[i$8] = this._legalize(t + 2);
+                hullNext[n$1] = n$1; // mark as removed
+                hullSize--;
+                n$1 = q;
+            }
+
+            // walk backward from the other side, adding more triangles and flipping
+            if (e === start) {
+                while (q = hullPrev[e], orient(x$2, y$2, coords[2 * q], coords[2 * q + 1], coords[2 * e], coords[2 * e + 1])) {
+                    t = this._addTriangle(q, i$8, e, -1, hullTri[e], hullTri[q]);
+                    this._legalize(t + 2);
+                    hullTri[q] = t;
+                    hullNext[e] = e; // mark as removed
+                    hullSize--;
+                    e = q;
+                }
+            }
+
+            // update the hull indices
+            this._hullStart = hullPrev[i$8] = e;
+            hullNext[e] = hullPrev[n$1] = i$8;
+            hullNext[i$8] = n$1;
+
+            // save the two new edges in the hash table
+            hullHash[this._hashKey(x$2, y$2)] = i$8;
+            hullHash[this._hashKey(coords[2 * e], coords[2 * e + 1])] = e;
+        }
+
+        this.hull = new Uint32Array(hullSize);
+        for (var i$9 = 0, e$1 = this._hullStart; i$9 < hullSize; i$9++) {
+            this.hull[i$9] = e$1;
+            e$1 = hullNext[e$1];
+        }
+
+        // trim typed triangle mesh arrays
+        this.triangles = this._triangles.subarray(0, this.trianglesLen);
+        this.halfedges = this._halfedges.subarray(0, this.trianglesLen);
+    };
+
+    Delaunator.prototype._hashKey = function _hashKey (x, y) {
+        return Math.floor(pseudoAngle(x - this._cx, y - this._cy) * this._hashSize) % this._hashSize;
+    };
+
+    Delaunator.prototype._legalize = function _legalize (a) {
+        var ref = this;
+            var triangles = ref._triangles;
+            var halfedges = ref._halfedges;
+            var coords = ref.coords;
+
+        var i = 0;
+        var ar = 0;
+
+        // recursion eliminated with a fixed-size stack
+        while (true) {
+            var b = halfedges[a];
+
+            /* if the pair of triangles doesn't satisfy the Delaunay condition
+             * (p1 is inside the circumcircle of [p0, pl, pr]), flip them,
+             * then do the same check/flip recursively for the new pair of triangles
+             *
+             *       pl                pl
+             *      /||\              /  \
+             *   al/ || \bl        al/\a
+             *    /  ||  \          /  \
+             *   /  a||b  \flip/___ar___\
+             * p0\   ||   /p1   =>   p0\---bl---/p1
+             *    \  ||  /          \  /
+             *   ar\ || /br         b\/br
+             *      \||/              \  /
+             *       pr                pr
+             */
+            var a0 = a - a % 3;
+            ar = a0 + (a + 2) % 3;
+
+            if (b === -1) { // convex hull edge
+                if (i === 0) { break; }
+                a = EDGE_STACK[--i];
+                continue;
+            }
+
+            var b0 = b - b % 3;
+            var al = a0 + (a + 1) % 3;
+            var bl = b0 + (b + 2) % 3;
+
+            var p0 = triangles[ar];
+            var pr = triangles[a];
+            var pl = triangles[al];
+            var p1 = triangles[bl];
+
+            var illegal = inCircle(
+                coords[2 * p0], coords[2 * p0 + 1],
+                coords[2 * pr], coords[2 * pr + 1],
+                coords[2 * pl], coords[2 * pl + 1],
+                coords[2 * p1], coords[2 * p1 + 1]);
+
+            if (illegal) {
+                triangles[a] = p1;
+                triangles[b] = p0;
+
+                var hbl = halfedges[bl];
+
+                // edge swapped on the other side of the hull (rare); fix the halfedge reference
+                if (hbl === -1) {
+                    var e = this._hullStart;
+                    do {
+                        if (this._hullTri[e] === bl) {
+                            this._hullTri[e] = a;
+                            break;
+                        }
+                        e = this._hullPrev[e];
+                    } while (e !== this._hullStart);
+                }
+                this._link(a, hbl);
+                this._link(b, halfedges[ar]);
+                this._link(ar, bl);
+
+                var br = b0 + (b + 1) % 3;
+
+                // don't worry about hitting the cap: it can only happen on extremely degenerate input
+                if (i < EDGE_STACK.length) {
+                    EDGE_STACK[i++] = br;
+                }
+            } else {
+                if (i === 0) { break; }
+                a = EDGE_STACK[--i];
+            }
+        }
+
+        return ar;
+    };
+
+    Delaunator.prototype._link = function _link (a, b) {
+        this._halfedges[a] = b;
+        if (b !== -1) { this._halfedges[b] = a; }
+    };
+
+    // add a new triangle given vertex indices and adjacent half-edge ids
+    Delaunator.prototype._addTriangle = function _addTriangle (i0, i1, i2, a, b, c) {
+        var t = this.trianglesLen;
+
+        this._triangles[t] = i0;
+        this._triangles[t + 1] = i1;
+        this._triangles[t + 2] = i2;
+
+        this._link(t, a);
+        this._link(t + 1, b);
+        this._link(t + 2, c);
+
+        this.trianglesLen += 3;
+
+        return t;
+    };
+
+    // monotonically increases with real angle, but doesn't need expensive trigonometry
+    function pseudoAngle(dx, dy) {
+        var p = dx / (Math.abs(dx) + Math.abs(dy));
+        return (dy > 0 ? 3 - p : 1 + p) / 4; // [0..1]
+    }
+
+    function dist(ax, ay, bx, by) {
+        var dx = ax - bx;
+        var dy = ay - by;
+        return dx * dx + dy * dy;
+    }
+
+    // return 2d orientation sign if we're confident in it through J. Shewchuk's error bound check
+    function orientIfSure(px, py, rx, ry, qx, qy) {
+        var l = (ry - py) * (qx - px);
+        var r = (rx - px) * (qy - py);
+        return Math.abs(l - r) >= 3.3306690738754716e-16 * Math.abs(l + r) ? l - r : 0;
+    }
+
+    // a more robust orientation test that's stable in a given triangle (to fix robustness issues)
+    function orient(rx, ry, qx, qy, px, py) {
+        var sign = orientIfSure(px, py, rx, ry, qx, qy) ||
+        orientIfSure(rx, ry, qx, qy, px, py) ||
+        orientIfSure(qx, qy, px, py, rx, ry);
+        return sign < 0;
+    }
+
+    function inCircle(ax, ay, bx, by, cx, cy, px, py) {
+        var dx = ax - px;
+        var dy = ay - py;
+        var ex = bx - px;
+        var ey = by - py;
+        var fx = cx - px;
+        var fy = cy - py;
+
+        var ap = dx * dx + dy * dy;
+        var bp = ex * ex + ey * ey;
+        var cp = fx * fx + fy * fy;
+
+        return dx * (ey * cp - bp * fy) -
+               dy * (ex * cp - bp * fx) +
+               ap * (ex * fy - ey * fx) < 0;
+    }
+
+    function circumradius(ax, ay, bx, by, cx, cy) {
+        var dx = bx - ax;
+        var dy = by - ay;
+        var ex = cx - ax;
+        var ey = cy - ay;
+
+        var bl = dx * dx + dy * dy;
+        var cl = ex * ex + ey * ey;
+        var d = 0.5 / (dx * ey - dy * ex);
+
+        var x = (ey * bl - dy * cl) * d;
+        var y = (dx * cl - ex * bl) * d;
+
+        return x * x + y * y;
+    }
+
+    function circumcenter(ax, ay, bx, by, cx, cy) {
+        var dx = bx - ax;
+        var dy = by - ay;
+        var ex = cx - ax;
+        var ey = cy - ay;
+
+        var bl = dx * dx + dy * dy;
+        var cl = ex * ex + ey * ey;
+        var d = 0.5 / (dx * ey - dy * ex);
+
+        var x = ax + (ey * bl - dy * cl) * d;
+        var y = ay + (dx * cl - ex * bl) * d;
+
+        return {x: x, y: y};
+    }
+
+    function quicksort(ids, dists, left, right) {
+        if (right - left <= 20) {
+            for (var i = left + 1; i <= right; i++) {
+                var temp = ids[i];
+                var tempDist = dists[temp];
+                var j = i - 1;
+                while (j >= left && dists[ids[j]] > tempDist) { ids[j + 1] = ids[j--]; }
+                ids[j + 1] = temp;
+            }
+        } else {
+            var median = (left + right) >> 1;
+            var i$1 = left + 1;
+            var j$1 = right;
+            swap(ids, median, i$1);
+            if (dists[ids[left]] > dists[ids[right]]) { swap(ids, left, right); }
+            if (dists[ids[i$1]] > dists[ids[right]]) { swap(ids, i$1, right); }
+            if (dists[ids[left]] > dists[ids[i$1]]) { swap(ids, left, i$1); }
+
+            var temp$1 = ids[i$1];
+            var tempDist$1 = dists[temp$1];
+            while (true) {
+                do { i$1++; } while (dists[ids[i$1]] < tempDist$1);
+                do { j$1--; } while (dists[ids[j$1]] > tempDist$1);
+                if (j$1 < i$1) { break; }
+                swap(ids, i$1, j$1);
+            }
+            ids[left + 1] = ids[j$1];
+            ids[j$1] = temp$1;
+
+            if (right - i$1 + 1 >= j$1 - left) {
+                quicksort(ids, dists, i$1, right);
+                quicksort(ids, dists, left, j$1 - 1);
+            } else {
+                quicksort(ids, dists, left, j$1 - 1);
+                quicksort(ids, dists, i$1, right);
+            }
+        }
+    }
+
+    function swap(arr, i, j) {
+        var tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+
+    function defaultGetX(p) {
+        return p[0];
+    }
+    function defaultGetY(p) {
+        return p[1];
+    }
+
+    (function(HTMLCanvasElement) {
+
+
+      // 3x3 行列の掛け算
+      function multiply(a, b) {
+        var m = [];
+        for (var i = 0; i < b.length; i += 3)
+          { for (var j = 0; j < 3; j++)
+            { m.push(a[j + 0] * b[i + 0] + a[j + 3] * b[i + 1] + a[j + 6] * b[i + 2]); } }
+        return m;
+      }
+
+      // 3x3 行列の逆行列
+      function inverse(a) {
+        var det = a[0] * a[4] * a[8] + a[3] * a[7] * a[2] + a[6] * a[1] * a[5] -
+          a[0] * a[7] * a[5] - a[6] * a[4] * a[2] - a[3] * a[1] * a[8];
+        return [
+          (a[4] * a[8] - a[7] * a[5]) / det,
+          (a[7] * a[2] - a[1] * a[8]) / det,
+          (a[1] * a[5] - a[4] * a[2]) / det,
+          (a[6] * a[5] - a[3] * a[8]) / det,
+          (a[0] * a[8] - a[6] * a[2]) / det,
+          (a[3] * a[2] - a[0] * a[5]) / det,
+          (a[3] * a[7] - a[6] * a[4]) / det,
+          (a[6] * a[1] - a[0] * a[7]) / det,
+          (a[0] * a[4] - a[1] * a[3]) / det
+        ];
+      }
+
+      // ベクトルの引き算
+      function subtract(a, b) {
+        return [a[0] - b[0], a[1] - b[1]];
+      }
+      // ベクトルの外積
+      function cross(a, b) {
+        return a[0] * b[1] - a[1] * b[0];
+      }
+
+      // 三角形と点の内外判定
+      function pointWithInTriangle(p, triangle) {
+        var v12 = subtract(triangle[1], triangle[0]);
+        var v23 = subtract(triangle[2], triangle[1]);
+        var v31 = subtract(triangle[0], triangle[2]);
+        var v10 = subtract(p, triangle[0]);
+        var v20 = subtract(p, triangle[1]);
+        var v30 = subtract(p, triangle[2]);
+        var c1 = cross(v12, v20);
+        var c2 = cross(v23, v30);
+        var c3 = cross(v31, v10);
+        return ((c1 > 0 && c2 > 0 && c3 > 0) || (c1 < 0 && c2 < 0 && c3 < 0));
+      }
+
+      // from から to への変換行列
+      function createTransformMatrix(from, to) {
+        var m1 = [from[0][0], from[0][1], 1, from[1][0], from[1][1], 1, from[2][0], from[2][1], 1];
+        var m2 = [to[0][0], to[0][1], 1, to[1][0], to[1][1], 1, to[2][0], to[2][1], 1];
+        return multiply(m2, inverse(m1));
+      }
+
+
+
+      var getContext = HTMLCanvasElement.prototype.getContext;
+
+      HTMLCanvasElement.prototype.getContext = function(id, options) {
+        var canvas = this;
+        if (id !== "morph") { return getContext.apply(canvas, [id, options]); }
+
+        var gl = canvas.getContext('webgl', {
+          preserveDrawingBuffer: true
+        });
+        var pg = this.pg = gl.createProgram();
+
+        (function(shader) {
+          gl.shaderSource(shader, "attribute vec4 p;varying vec2 a;uniform vec4 m;void main(){vec4 q=m*p;gl_Position=vec4(q.zw,0,1)+vec4(-1,1,0,0);a=q.xy;}");
+          gl.compileShader(shader);
+          gl.attachShader(pg, shader);
+        })(gl.createShader(gl.VERTEX_SHADER));
+
+        (function(shader) {
+          gl.shaderSource(shader, "precision mediump float;uniform sampler2D i;varying vec2 a;void main(){gl_FragColor=texture2D(i,a);}");
+          gl.compileShader(shader);
+          gl.attachShader(pg, shader);
+        })(gl.createShader(gl.FRAGMENT_SHADER));
+
+        gl.linkProgram(pg);
+        if (gl.getProgramParameter(pg, gl.LINK_STATUS)) {
+          gl.useProgram(pg);
+        } else {
+          throw new Error(gl.getProgramInfoLog(pg));
+        }
+
+        var _previousImage = null;
+        var _previousCopy = null;
+
+        return {
+          _coords: null,
+          canvas: canvas,
+          drawImage: function(image, controlPoints) {
+            if (_previousImage !== image) {
+
+              _previousCopy = document.createElement("canvas");
+              _previousCopy.width = Math.pow(2, Math.ceil(Math.log2(image.naturalWidth)));
+              _previousCopy.height = Math.pow(2, Math.ceil(Math.log2(image.naturalHeight)));
+              _previousCopy.getContext("2d").drawImage(image, 0, 0);
+
+              (function(texture) {
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, _previousCopy);
+              })(gl.createTexture());
+
+              _previousImage = image;
+            }
+
+            var coords = [];
+            Delaunator.from(controlPoints).triangles.forEach(function(i) {
+              Array.prototype.push.apply(coords, controlPoints[i]);
+            });
+
+            this._coords = coords;
+
+            (function(location) {
+              gl.uniform4f(location, 1 / _previousCopy.width, 1 / _previousCopy.height, 2 / canvas.width, -2 / canvas.height);
+            })(gl.getUniformLocation(pg, "m"));
+
+            var buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
+
+            var location = gl.getAttribLocation(pg, "p");
+            gl.enableVertexAttribArray(location);
+            gl.vertexAttribPointer(location, 4, gl.FLOAT, false, 0, 0);
+
+            gl.drawArrays(gl.TRIANGLES, 0, coords.length / 4);
+          },
+          clear: function() {
+            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+          },
+          getTexturePointAt: function(x, y) {
+            var coords = this._coords;
+            for (var i = 0; i < coords.length; i += 12) {
+              var canvasTriangle = [
+                [coords[i + 2], coords[i + 3]],
+                [coords[i + 6], coords[i + 7]],
+                [coords[i + 10], coords[i + 11]]
+              ];
+              var textureTriangle = [
+                [coords[i + 0], coords[i + 1]],
+                [coords[i + 4], coords[i + 5]],
+                [coords[i + 8], coords[i + 9]]
+              ];
+              if (pointWithInTriangle([x, y], canvasTriangle)) {
+                var m = createTransformMatrix(canvasTriangle, textureTriangle);
+                var q = multiply(m, [x, y, 1]);
+                return [q[0], q[1]];
+              }
+            }
+            return null;
+          }
+        };
+      };
+
+    })(HTMLCanvasElement);
+
+}());
