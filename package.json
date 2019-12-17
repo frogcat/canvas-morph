@@ -4,7 +4,7 @@
   "description": "canvas-morph",
   "main": "main.js",
   "scripts": {
-    "build": "webpack",
+    "build": "rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -24,7 +24,8 @@
     "delaunator": "^4.0.1"
   },
   "devDependencies": {
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "@rollup/plugin-buble": "^0.20.0",
+    "@rollup/plugin-node-resolve": "^6.0.0",
+    "rollup": "^1.27.13"
   }
 }
