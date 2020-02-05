@@ -2,7 +2,7 @@
   "name": "canvas-morph",
   "version": "1.0.0",
   "description": "canvas-morph",
-  "main": "main.js",
+  "main": "canvas-morph.js",
   "scripts": {
     "build": "rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -504,8 +504,7 @@
         return p[1];
     }
 
-    (function(HTMLCanvasElement) {
-
+    function canvasMorph(HTMLCanvasElement) {
 
       // 3x3 行列の掛け算
       function multiply(a, b) {
@@ -670,7 +669,8 @@
           }
         };
       };
+    }
 
-    })(HTMLCanvasElement);
+    canvasMorph(HTMLCanvasElement);
 
 }());
