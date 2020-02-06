@@ -1,6 +1,6 @@
 import Delaunator from 'delaunator';
 
-export default function(HTMLCanvasElement) {
+(function(HTMLCanvasElement) {
 
   // 3x3 行列の掛け算
   function multiply(a, b) {
@@ -165,4 +165,4 @@ export default function(HTMLCanvasElement) {
       }
     };
   }
-}
+})(window.HTMLCanvasElement);
