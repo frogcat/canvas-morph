@@ -7,10 +7,10 @@ import {
 export default {
   input: 'canvas-morph.js',
   output: [{
-    file: 'docs/canvas-morph.js',
+    file: 'dist/canvas-morph.js',
     format: 'iife'
   }, {
-    file: 'docs/canvas-morph.min.js',
+    file: 'dist/canvas-morph.min.js',
     format: 'iife',
     plugins: [terser()]
   }],

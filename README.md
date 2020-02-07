@@ -3,7 +3,7 @@ canvas-morph
 
 # Demo
 
-- <https://frogcat.github.io/canvas-morph/>
+- <https://frogcat.github.io/dist/canvas-morph/>
 
 # Usage
 
