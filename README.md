@@ -8,8 +8,8 @@ canvas-morph
 # Usage
 
 ```html
-<!-- import canva-morph.js to extend HTMLCanvasElement -->
-<script src='https://frogcat.github.io/canvas-morph/canvas-morph.js' />
+<!-- import canva-morph.min.js to extend HTMLCanvasElement -->
+<script src='https://frogcat.github.io/canvas-morph/dist/canvas-morph.min.js' />
 
 <script>
   // call getContext('morph') to get custom context
